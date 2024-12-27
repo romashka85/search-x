@@ -3,46 +3,54 @@ import { SearchContext } from "../context/SearchContext";
 import "./module.css";
 import PropTypes from "prop-types";
 
-const SearchBar = ({
-  options,
-  getLastSearch,
-  search,
-  setSearch,
-  searchHistory,
-  removeSearchHistory,
-}) => {
-  // const {
-  //   searchHistory,
-  //   autoCompleteItems,
-  //   setAutoCompleteItems,
-  //   addSearchHistory,
-  //   removeSearchHistory,
-  // } = useContext(SearchContext);
+const SearchBar = () => {
+  const {
+    searchItems,
+    addToSearchHistory,
+    searchQuery,
+    setSearchQuery,
+    searchHistory,
+    removeSearchHistory,
+  } = useContext(SearchContext);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
+  const handleEnterKey = (e) => {
+    const combinedItems = searchItems.length > 0 ? searchItems : searchHistory;
+
+    if (highlightedIndex >= 0 && combinedItems[highlightedIndex]) {
+      handleOptionClick(combinedItems[highlightedIndex]);
+    } else {
+      addToSearchHistory(e.target.value); // Fallback to the current search input
+    }
+
+    // Close the dropdown only after updating the state
+    setTimeout(() => {
+      setIsDropdownOpen(false);
+    }, 0);
+  };
+
   const handleSearchChange = (event) => {
     const newQuery = event.target.value;
-    setSearch(newQuery);
+    setSearchQuery(newQuery);
     setIsDropdownOpen(true);
     setHighlightedIndex(-1);
-  }; 
+  };
 
   const handleOptionClick = useCallback(
     (item) => {
       const itemTitle = typeof item === "string" ? item : item.title;
-      setSearch(itemTitle);
-      getLastSearch(itemTitle);
+      setSearchQuery(itemTitle);
+      addToSearchHistory(itemTitle);
       setIsDropdownOpen(false);
-      console.log("REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
     },
-    [getLastSearch, setSearch]
+    [addToSearchHistory, setSearchQuery]
   );
-  
 
   const handleKeyDown = useCallback(
     (e) => {
-      const combinedItems = options.length > 0 ? options : searchHistory; // Handle both options and searchHistory
+      const combinedItems =
+        searchItems.length > 0 ? searchItems : searchHistory; // Handle both options and searchHistory
       if (e.key === "ArrowDown") {
         e.preventDefault();
         setHighlightedIndex((prevIndex) =>
@@ -63,9 +71,8 @@ const SearchBar = ({
         setIsDropdownOpen(false);
       }
     },
-    [handleOptionClick, highlightedIndex, options, searchHistory]
+    [handleOptionClick, highlightedIndex, searchItems, searchHistory]
   );
-  
 
   useEffect(() => {
     if (isDropdownOpen) {
@@ -76,10 +83,10 @@ const SearchBar = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isDropdownOpen, highlightedIndex, options, handleKeyDown]);
+  }, [isDropdownOpen, highlightedIndex, searchItems, handleKeyDown]);
 
   const handleClear = () => {
-    setSearch("");
+    setSearchQuery("");
     setIsDropdownOpen(false);
   };
 
@@ -89,13 +96,18 @@ const SearchBar = ({
         <input
           className="search-input"
           type="text"
-          value={search}
+          value={searchQuery}
           onChange={handleSearchChange}
           placeholder="search..."
           onClick={() => setIsDropdownOpen(true)}
           onFocus={() => setIsDropdownOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleEnterKey(e);
+            }
+          }}
         />
-        {search && (
+        {searchQuery && (
           <button className="clear-button" onClick={handleClear}>
             X
           </button>
@@ -103,9 +115,9 @@ const SearchBar = ({
       </div>
       {isDropdownOpen && (
         <ul className="dropdown-list">
-          {options.length > 0
-            ? options.map((option, index) => (
-              <div key={index} className="dropdown-item-container">
+          {searchItems.length > 0
+            ? searchItems.map((option, index) => (
+                <div key={index} className="dropdown-item-container">
                   <li
                     className={`${
                       searchHistory.includes(option.title)
@@ -148,10 +160,10 @@ const SearchBar = ({
   );
 };
 SearchBar.propTypes = {
-  options: PropTypes.array.isRequired,
-  getLastSearch: PropTypes.func,
-  search: PropTypes.string.isRequired,
-  setSearch: PropTypes.func.isRequired,
+  searchItems: PropTypes.array.isRequired,
+  addToSearchHistory: PropTypes.func,
+  searchQuery: PropTypes.string.isRequired,
+  setSearchQuery: PropTypes.func.isRequired,
   searchHistory: PropTypes.array.isRequired,
   removeSearchHistory: PropTypes.func.isRequired,
 };

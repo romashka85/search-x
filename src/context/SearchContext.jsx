@@ -1,32 +1,67 @@
-import { createContext, useState } from 'react';
+// context/SearchContext.js
+import { createContext, useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { fakeDB } from "../data/fakeDB";
 
 export const SearchContext = createContext();
 
 const SearchProvider = ({ children }) => {
-    const [searchHistory, setSearchHistory] = useState([]);
-    const [autoCompleteItems, setAutoCompleteItems] = useState([]);
+  const [searchHistory, setSearchHistory] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchItems, setSearchItems] = useState([]);
+  const numOfResults = 10;
 
-    const addSearchHistory = (item) => {
-        if (!searchHistory.includes(item)) {
-            setSearchHistory([...searchHistory, item]);
-        }
-    };
+  useEffect(() => {
+    if (searchQuery) {
+      setSearchItems(
+        fakeDB
+          .filter((option) =>
+            option.title.toLowerCase().startsWith(searchQuery.toLowerCase())
+          )
+          .slice(0, numOfResults)
+      );
+    } else {
+      setSearchItems([]);
+    }
+  }, [searchQuery, searchHistory]);
 
-    const removeSearchHistory = (item) => {
-        setSearchHistory(searchHistory.filter((history) => history !== item));
-    };
+  const addToSearchHistory = (item) => {
+    if (!item) return;
+    setSearchHistory((prevState) => {
+      const newSearch = [
+        item,
+        ...prevState.filter((search) => search !== item),
+      ];
+      if (newSearch.length > 10) {
+        newSearch.pop();
+      }
+      return newSearch;
+    });
+  };
 
-    return (
-        <SearchContext.Provider value={{
-            searchHistory,
-            autoCompleteItems,
-            setAutoCompleteItems,
-            addSearchHistory,
-            removeSearchHistory
-        }}>
-            {children}
-        </SearchContext.Provider>
+  const removeSearchHistory = (item) => {
+    setSearchHistory((prevState) =>
+      prevState.filter((search) => search !== item)
     );
+  };
+
+  return (
+    <SearchContext.Provider
+      value={{
+        searchHistory,
+        searchQuery,
+        setSearchQuery,
+        searchItems,
+        addToSearchHistory,
+        removeSearchHistory,
+      }}
+    >
+      {children}
+    </SearchContext.Provider>
+  );
+};
+SearchProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default SearchProvider;
