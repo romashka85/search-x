@@ -9,6 +9,7 @@ const SearchProvider = ({ children }) => {
   const [searchHistory, setSearchHistory] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchItems, setSearchItems] = useState([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const numOfResults = 10;
 
   useEffect(() => {
@@ -39,7 +40,7 @@ const SearchProvider = ({ children }) => {
     });
   };
 
-  const removeSearchHistory = (item) => {
+  const removeSearchHistory = (item) => {     
     setSearchHistory((prevState) =>
       prevState.filter((search) => search !== item)
     );
@@ -54,6 +55,8 @@ const SearchProvider = ({ children }) => {
         searchItems,
         addToSearchHistory,
         removeSearchHistory,
+        isSearchOpen,
+        setIsSearchOpen
       }}
     >
       {children}

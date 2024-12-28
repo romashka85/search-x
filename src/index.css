@@ -1,15 +1,15 @@
 body {
   margin: 0;
   padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
 
@@ -25,23 +25,6 @@ ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
-}
-
-.results {
-  border: 1px solid #ccc;
-  border-top: 0;
-  width: 100%;
-  padding: 5px 0;
-  max-height: 200px;
-  overflow-y: scroll;
-}
-
-.result {
-  padding: 5px;
-  cursor: pointer;
-}
-.result:hover {
-  background-color: #eee;
 }
 
 form {
@@ -60,8 +43,61 @@ input {
 }
 
 .wrapper {
-  display: flex;  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 8em;
 }
-section {
-  margin-right: 5em;
+
+.result-wrapper {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  margin: 1em 2em;
+}
+
+.logo {
+  font-family: "Roboto", Arial, sans-serif;
+  font-size: 48px;
+  font-weight: bold;
+  display: inline-block;
+  margin: 0 auto 0.3em auto;
+  width: 100%;
+  text-align: center;
+}
+
+.s {
+  color: #4285f4; /* Blue */
+}
+
+.e {
+  color: #ea4335; /* Red */
+}
+
+.a {
+  color: #fbbc05; /* Yellow */
+}
+
+.r {
+  color: #34a853; /* Green */
+}
+
+.c {
+  color: #4285f4; /* Blue */
+}
+
+.h {
+  color: #ea4335; /* Red */
+}
+
+.space {
+  padding: 0 8px; /* Adds space between 'Search' and 'X' */
+}
+
+.x {
+  color: #fbbc05; /* Yellow */
+}
+.stretch {
+  padding-right: 5px;
 }

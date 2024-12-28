@@ -1,19 +1,29 @@
 import SearchBar from "./components/SearchBar";
-import SearchProvider from "./context/SearchContext";
+import SearchProvider, { SearchContext } from "./context/SearchContext";
 import "./styles.css";
 import ResultList from "./components/ResultList";
+import SearchXLogo from "./components/logo";
+import { useContext } from "react";
 
 const App = () => {
   return (
     <SearchProvider>
-      <div className="wrapper">
-        <section>
-          <h1>Search X</h1>
-          <SearchBar />
-        </section>
-      </div>
-      <ResultList />
+      <Search  />
     </SearchProvider>
+  );
+};
+
+const Search  = () => {
+  const { isSearchOpen } = useContext(SearchContext);
+  console.log("isSearchOpen", isSearchOpen);
+  return (
+   
+      <div className={!isSearchOpen ? "wrapper" : "result-wrapper"}>
+        <SearchXLogo />
+        <SearchBar />
+        <ResultList />
+      </div>
+   
   );
 };
 

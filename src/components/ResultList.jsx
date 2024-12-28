@@ -1,10 +1,9 @@
 import { useState, useEffect, useContext } from "react";
-import PropTypes from "prop-types";
 import { fakeDB } from "../data/fakeDB";
 import { SearchContext } from "../context/SearchContext";
 
 const ResultList = () => {
-  const { searchQuery } = useContext(SearchContext);
+  const { searchQuery, isSearchOpen } = useContext(SearchContext);
   const [results, setResults] = useState([]);
   const [searchTime, setSearchTime] = useState(0);
 
@@ -21,25 +20,26 @@ const ResultList = () => {
   }, [searchQuery]);
 
   return (
-    <div className="results-list">
-      <p>
-        {results.length} results found in {searchTime} ms
-      </p>
-      <ul>
-        {results.map((result, index) => (
-          <li key={index}>
-            <a href={result.url} target="_blank">
-              {result.title}
-            </a>
-            <p>{result.description}</p>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <>
+      {isSearchOpen && (
+        <div className="results-list">
+          {results.length > 0 && (
+            <p>
+              {results.length} results found in {searchTime} ms
+            </p>
+          )}
+          {results.map((result, index) => (
+            <div key={index}>
+              <a href={result.url} target="_blank">
+                {result.title}
+              </a>
+              <p>{result.description}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
   );
-};
-ResultList.propTypes = {
-  searchQuery: PropTypes.string.isRequired,
 };
 
 export default ResultList;

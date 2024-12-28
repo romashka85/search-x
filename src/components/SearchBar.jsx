@@ -1,7 +1,11 @@
 import { useContext, useCallback, useState, useEffect } from "react";
 import { SearchContext } from "../context/SearchContext";
-import "./module.css";
-import PropTypes from "prop-types";
+import { IoIosSearch } from "react-icons/io";
+import { IoMdClose } from "react-icons/io";
+import { GoClock } from "react-icons/go";
+import { useClickOutside } from "react-click-outside-hook";
+import "../styles.css";
+import RemoveButton from "./RemoveButton";
 
 const SearchBar = () => {
   const {
@@ -11,19 +15,24 @@ const SearchBar = () => {
     setSearchQuery,
     searchHistory,
     removeSearchHistory,
+    setIsSearchOpen,
   } = useContext(SearchContext);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
+  // Use the click outside hook
+  const [ref, hasClickedOutside] = useClickOutside();
+  if (hasClickedOutside && isDropdownOpen) {
+    setIsDropdownOpen(false);
+  }
+
   const handleEnterKey = (e) => {
     const combinedItems = searchItems.length > 0 ? searchItems : searchHistory;
-
     if (highlightedIndex >= 0 && combinedItems[highlightedIndex]) {
       handleOptionClick(combinedItems[highlightedIndex]);
     } else {
-      addToSearchHistory(e.target.value); // Fallback to the current search input
+      addToSearchHistory(e.target.value);
     }
-
     // Close the dropdown only after updating the state
     setTimeout(() => {
       setIsDropdownOpen(false);
@@ -43,8 +52,9 @@ const SearchBar = () => {
       setSearchQuery(itemTitle);
       addToSearchHistory(itemTitle);
       setIsDropdownOpen(false);
+      setIsSearchOpen(true);
     },
-    [addToSearchHistory, setSearchQuery]
+    [addToSearchHistory, setSearchQuery, setIsSearchOpen]
   );
 
   const handleKeyDown = useCallback(
@@ -91,14 +101,14 @@ const SearchBar = () => {
   };
 
   return (
-    <div className="dropdown">
+    <div className="dropdown" ref={ref}>
       <div className="search-container">
+        <IoIosSearch className="search-icon" />
         <input
-          className="search-input"
+          className={`search-input ${isDropdownOpen ? "search-bar" : ""}`}
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
-          placeholder="search..."
           onClick={() => setIsDropdownOpen(true)}
           onFocus={() => setIsDropdownOpen(true)}
           onKeyDown={(e) => {
@@ -109,63 +119,72 @@ const SearchBar = () => {
         />
         {searchQuery && (
           <button className="clear-button" onClick={handleClear}>
-            X
+            <IoMdClose />
           </button>
         )}
       </div>
       {isDropdownOpen && (
         <ul className="dropdown-list">
-          {searchItems.length > 0
-            ? searchItems.map((option, index) => (
-                <div key={index} className="dropdown-item-container">
-                  <li
-                    className={`${
-                      searchHistory.includes(option.title)
-                        ? "dropdown-item resent-search"
-                        : "dropdown-item"
-                    } ${index === highlightedIndex ? "highlighted" : ""}`}
-                    onClick={() => handleOptionClick(option)}
-                    onMouseEnter={() => setHighlightedIndex(index)}
-                  >
-                    {option.title}
-                  </li>
-                  {searchHistory.includes(option.title) && (
-                    <button onClick={() => removeSearchHistory(option.title)}>
-                      Remove
-                    </button>
+          {searchItems.length > 0 ? (
+            searchItems.map((option, index) => (
+              <div key={index} className="dropdown-item-container">
+                <li
+                  className={`${
+                    searchHistory.includes(option.title)
+                      ? "dropdown-item resent-search"
+                      : "dropdown-item"
+                  } ${index === highlightedIndex ? "highlighted" : ""}`}
+                  onClick={() => handleOptionClick(option)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
+                >
+                  {searchHistory.includes(option.title) ? (
+                    <GoClock className="searched-item" />
+                  ) : (
+                    <IoIosSearch className="searched-item" />
                   )}
-                </div>
-              ))
-            : searchHistory.length > 0
-            ? searchHistory.map((item, index) => (
-                <div key={index} className="dropdown-item-container">
-                  <li
-                    className={`dropdown-item resent-search ${
-                      index === highlightedIndex ? "highlighted" : ""
-                    }`}
-                    onClick={() => handleOptionClick(item)}
-                    onMouseEnter={() => setHighlightedIndex(index)}
-                  >
-                    {item}
-                  </li>
-                  <button onClick={() => removeSearchHistory(item)}>
-                    Remove
-                  </button>
-                </div>
-              ))
-            : null}
+                  {option.title}
+                </li>
+                {searchHistory.includes(option.title) && (
+                  <RemoveButton
+                    item={option.title}
+                    index={index}
+                    highlightedIndex={highlightedIndex}
+                    removeSearchHistory={removeSearchHistory}
+                  />
+                )}
+              </div>
+            ))
+          ) : searchHistory.length > 0 ? (
+            searchHistory.map((item, index) => (
+              <div key={index} className="dropdown-item-container">
+                <li
+                  className={`dropdown-item resent-search ${
+                    index === highlightedIndex ? "highlighted" : ""
+                  }`}
+                  onClick={() => handleOptionClick(item)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
+                >
+                  <GoClock className="searched-item" />
+                  {item}
+                </li>
+                <RemoveButton
+                  item={item}
+                  index={index}
+                  highlightedIndex={highlightedIndex}
+                  removeSearchHistory={removeSearchHistory}
+                />
+              </div>
+            ))
+          ) : (
+            <li className="dropdown-item">
+              <IoIosSearch className="searched-item" />
+              No results found
+            </li>
+          )}
         </ul>
       )}
     </div>
   );
-};
-SearchBar.propTypes = {
-  searchItems: PropTypes.array.isRequired,
-  addToSearchHistory: PropTypes.func,
-  searchQuery: PropTypes.string.isRequired,
-  setSearchQuery: PropTypes.func.isRequired,
-  searchHistory: PropTypes.array.isRequired,
-  removeSearchHistory: PropTypes.func.isRequired,
 };
 
 export default SearchBar;
